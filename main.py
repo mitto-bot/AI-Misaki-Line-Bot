@@ -1,4 +1,5 @@
 import os
+import threading
 import requests
 from flask import Flask, request, abort
 
@@ -38,11 +39,26 @@ def callback():
     body = request.get_data(as_text=True)
 
     try:
-        handler.handle(body, signature)
+        # 署名チェックだけ先に実行
+        handler.parser.parse(body, signature)
     except InvalidSignatureError:
         abort(400)
 
-    return "OK"
+    # LINEへの応答はすぐ200を返し、処理は裏側で実行する
+    threading.Thread(
+        target=handle_webhook_safely,
+        args=(body, signature),
+        daemon=True
+    ).start()
+
+    return "OK", 200
+
+
+def handle_webhook_safely(body, signature):
+    try:
+        handler.handle(body, signature)
+    except Exception as e:
+        print("Webhook handling error:", e)
 
 
 @handler.add(MessageEvent, message=TextMessageContent)
@@ -81,7 +97,7 @@ def ask_dify(user_text, user_id):
             DIFY_API_URL,
             headers=headers,
             json=payload,
-            timeout=30,
+            timeout=20,
         )
 
         print("========== DIFY DEBUG ==========")
