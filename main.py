@@ -1,3 +1,4 @@
+```python
 import os
 import requests
 from flask import Flask, request, abort
@@ -18,7 +19,10 @@ app = Flask(__name__)
 LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN")
 LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET")
 DIFY_API_KEY = os.environ.get("DIFY_API_KEY")
-DIFY_API_URL = os.environ.get("DIFY_API_URL", "https://api.dify.ai/v1/chat-messages")
+DIFY_API_URL = os.environ.get(
+    "DIFY_API_URL",
+    "https://api.dify.ai/v1/chat-messages"
+)
 
 configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
@@ -74,14 +78,31 @@ def ask_dify(user_text, user_id):
     }
 
     try:
-        response = requests.post(DIFY_API_URL, headers=headers, json=payload, timeout=30)
+        response = requests.post(
+            DIFY_API_URL,
+            headers=headers,
+            json=payload,
+            timeout=30,
+        )
+
+        print("========== DIFY DEBUG ==========")
+        print("Status:", response.status_code)
+        print("Response:", response.text)
+        print("================================")
+
         response.raise_for_status()
+
         data = response.json()
-        return data.get("answer", "すみません、うまく回答を作れませんでした。")
+        return data.get(
+            "answer",
+            "すみません、うまく回答を作れませんでした。"
+        )
+
     except Exception as e:
-        print(f"Dify error: {e}")
+        print("Dify error:", e)
         return "すみません、現在AI美咲の回答システムに接続できません。少し時間をおいてもう一度お試しください。"
 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
+```
