@@ -18,13 +18,20 @@ from linebot.v3.webhooks import MessageEvent, TextMessageContent
 
 app = Flask(__name__)
 
-LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN", "")
-LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET", "")
-DIFY_API_KEY = os.environ.get("DIFY_API_KEY", "")
+LINE_CHANNEL_ACCESS_TOKEN = os.environ.get("LINE_CHANNEL_ACCESS_TOKEN", "").strip()
+LINE_CHANNEL_SECRET = os.environ.get("LINE_CHANNEL_SECRET", "").strip()
+DIFY_API_KEY = os.environ.get("DIFY_API_KEY", "").strip()
 DIFY_API_URL = os.environ.get(
     "DIFY_API_URL",
     "https://api.dify.ai/v1/chat-messages"
-)
+).strip()
+
+print("========== ENV CHECK ==========")
+print("LINE_TOKEN_LEN:", len(LINE_CHANNEL_ACCESS_TOKEN))
+print("LINE_SECRET_LEN:", len(LINE_CHANNEL_SECRET))
+print("DIFY_KEY_LEN:", len(DIFY_API_KEY))
+print("DIFY_API_URL:", DIFY_API_URL)
+print("===============================")
 
 configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
@@ -46,8 +53,6 @@ def callback():
     print("===========================================")
 
     try:
-        # LINE Developers の「確認する」対策。
-        # 署名だけ先に検証し、Cloud Runはすぐ200を返す。
         handler.parser.parse(body, signature)
     except InvalidSignatureError:
         print("LINE signature error: InvalidSignatureError")
