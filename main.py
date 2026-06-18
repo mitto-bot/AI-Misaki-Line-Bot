@@ -11,7 +11,7 @@ from linebot.v3.messaging import (
     Configuration,
     ApiClient,
     MessagingApi,
-    ReplyMessageRequest,
+    PushMessageRequest,
     TextMessage,
 )
 from linebot.v3.webhooks import MessageEvent, TextMessageContent
@@ -31,7 +31,7 @@ print("LINE_TOKEN_LEN:", len(LINE_CHANNEL_ACCESS_TOKEN))
 print("LINE_SECRET_LEN:", len(LINE_CHANNEL_SECRET))
 print("DIFY_KEY_LEN:", len(DIFY_API_KEY))
 print("DIFY_API_URL:", DIFY_API_URL)
-print("===============================")
+print("================================")
 
 configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
@@ -94,15 +94,15 @@ def handle_message(event):
     try:
         with ApiClient(configuration) as api_client:
             line_bot_api = MessagingApi(api_client)
-            line_bot_api.reply_message(
-                ReplyMessageRequest(
-                    reply_token=event.reply_token,
+            line_bot_api.push_message(
+                PushMessageRequest(
+                    to=user_id,
                     messages=[TextMessage(text=reply_text)],
                 )
             )
-        print("LINE reply success")
+        print("LINE push success")
     except Exception as e:
-        print("LINE reply error:", e)
+        print("LINE push error:", e)
         print(traceback.format_exc())
 
 
